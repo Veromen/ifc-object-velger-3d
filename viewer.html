@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFC Viewer</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="module">
+        import { IfcViewerAPI } from 'https://cdn.jsdelivr.net/npm/web-ifc-viewer@1.0.218/+esm';
+
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const viewer = new IfcViewerAPI({ container });
+        viewer.addAxes();
+        viewer.addGrid();
+
+        async function loadIFC(url) {
+            try {
+                console.log('Loading IFC model from:', url);
+                await viewer.IFC.loadIfcUrl(url);
+                console.log('IFC model loaded successfully');
+            } catch (error) {
+                console.error('Error loading IFC model:', error);
+            }
+        }
+
+        // Replace 'path_to_your_ifc_file.ifc' with the actual Blob URL provided by Streamlit
+        loadIFC('path_to_your_ifc_file.ifc');
+    </script>
+</body>
+</html>
