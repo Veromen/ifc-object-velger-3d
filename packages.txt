@@ -1,3 +1,15 @@
-libxml2-dev
-libxslt-dev
 build-essential
+cmake
+libboost-all-dev
+libtinyxml2-dev
+libopenblas-dev
+libeigen3-dev
+libtbb-dev
+libpng-dev
+libopenexr-dev
+libglew-dev
+libglfw3-dev
+libglm-dev
+wget
+unzip
+git
