@@ -11,7 +11,6 @@ import subprocess
 import uuid
 import textwrap
 import requests
-import zipfile
 from pathlib import Path
 
 # Configure logging
@@ -21,15 +20,15 @@ logger = logging.getLogger("IFCLogger")
 @st.cache_resource
 def install_ifcconvert():
     """
-    Downloads and installs the ifcconvert binary if it's not already present.
+    Downloads and installs the ifcconvert v0.7.11 binary if it's not already present.
     Returns the absolute path to the ifcconvert binary.
     """
     ifcconvert_path = Path("/tmp/IfcConvert")
     
     if not ifcconvert_path.exists():
-        st.write("🔄 Downloading ifcconvert...")
-        url = "https://github.com/IfcOpenShell/IfcOpenShell/releases/download/ifcconvert-0.8.0/ifcconvert-0.8.0-linux64.zip"
-        zip_path = "/tmp/ifcconvert.zip"
+        st.write("🔄 Downloading ifcconvert v0.7.11...")
+        url = "https://github.com/IfcOpenShell/IfcOpenShell/releases/download/ifcconvert-0.7.11/ifcconvert-0.7.11-linux64.zip"
+        zip_path = "/tmp/ifcconvert-0.7.11-linux64.zip"
         
         try:
             # Download the zip file
@@ -48,9 +47,17 @@ def install_ifcconvert():
             # Remove the zip file
             os.remove(zip_path)
             
-            # Make the binary executable
-            ifcconvert_path.chmod(0o755)
-            st.write("✅ ifcconvert is ready to use.")
+            # Path to the extracted ifcconvert binary
+            extracted_ifcconvert = Path("/tmp/ifcconvert")
+            if extracted_ifcconvert.exists():
+                # Make the binary executable
+                extracted_ifcconvert.chmod(0o755)
+                # Move to /tmp/IfcConvert for consistency
+                ifcconvert_path.symlink_to(extracted_ifcconvert)
+                st.write("✅ ifcconvert is ready to use.")
+            else:
+                st.error("🚨 ifcconvert binary not found after extraction.")
+                st.stop()
             
         except Exception as e:
             st.error(f"🚨 Failed to install ifcconvert: {e}")
