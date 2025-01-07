@@ -1,0 +1,9 @@
+streamlit
+lark-parser
+shapely
+typing-extensions
+numpy
+lxml==4.9.3
+regex==2021.4.4
+xmlschema==1.6.4
+ifcopenshell==0.7.0.240406
