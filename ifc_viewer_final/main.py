@@ -19,48 +19,34 @@ logger = logging.getLogger("IFCLogger")
 
 @st.cache_resource
 def install_ifcconvert():
-    """
-    Downloads and installs the ifcconvert v0.7.11 binary if it's not already present.
-    Returns the absolute path to the ifcconvert binary.
-    """
     ifcconvert_path = Path("/tmp/IfcConvert")
     
     if not ifcconvert_path.exists():
-        st.write("🔄 Downloading ifcconvert v0.7.11...")
-        url = "https://github.com/IfcOpenShell/IfcOpenShell/releases/download/ifcconvert-0.7.11/ifcconvert-0.7.11-linux64.zip"
-        zip_path = "/tmp/ifcconvert-0.7.11-linux64.zip"
+        st.write("🔄 Cloning IfcOpenShell repository...")
+        subprocess.run([
+            "git", "clone", "https://github.com/IfcOpenShell/IfcOpenShell.git", "/tmp/IfcOpenShell"
+        ], check=True)
         
-        try:
-            # Download the zip file
-            with requests.get(url, stream=True) as response:
-                response.raise_for_status()
-                with open(zip_path, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-            st.write("✅ Download complete.")
-            
-            # Extract the IfcConvert binary
-            with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                zip_ref.extractall("/tmp/")
-            st.write("✅ Extraction complete.")
-            
-            # Remove the zip file
-            os.remove(zip_path)
-            
-            # Path to the extracted ifcconvert binary
-            extracted_ifcconvert = Path("/tmp/ifcconvert")
-            if extracted_ifcconvert.exists():
-                # Make the binary executable
-                extracted_ifcconvert.chmod(0o755)
-                # Move to /tmp/IfcConvert for consistency
-                ifcconvert_path.symlink_to(extracted_ifcconvert)
-                st.write("✅ ifcconvert is ready to use.")
-            else:
-                st.error("🚨 ifcconvert binary not found after extraction.")
-                st.stop()
-            
-        except Exception as e:
-            st.error(f"🚨 Failed to install ifcconvert: {e}")
+        st.write("🔄 Building ifcconvert from source...")
+        build_dir = "/tmp/IfcOpenShell/build"
+        os.makedirs(build_dir, exist_ok=True)
+        
+        subprocess.run([
+            "cmake", ".."
+        ], cwd=build_dir, check=True)
+        
+        subprocess.run([
+            "make", "-j4"
+        ], cwd=build_dir, check=True)
+        
+        # Assume the binary is located at /tmp/IfcOpenShell/build/bin/IfcConvert
+        built_binary = Path(build_dir) / "bin" / "IfcConvert"
+        if built_binary.exists():
+            built_binary.chmod(0o755)
+            ifcconvert_path.symlink_to(built_binary)
+            st.write("✅ ifcconvert built and ready to use.")
+        else:
+            st.error("🚨 ifcconvert binary not found after build.")
             st.stop()
     
     return str(ifcconvert_path)
