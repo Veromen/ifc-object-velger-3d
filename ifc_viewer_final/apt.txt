@@ -1,3 +1,5 @@
+build-essential
+cmake
 libboost-all-dev
 libtinyxml2-dev
 libopenblas-dev
@@ -10,3 +12,4 @@ libglfw3-dev
 libglm-dev
 wget
 unzip
+git
