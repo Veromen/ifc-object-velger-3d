@@ -8,6 +8,8 @@ import os
 import zipfile
 import base64
 import subprocess
+import requests
+from pathlib import Path
 import uuid
 import textwrap
 
@@ -133,6 +135,43 @@ class Patcher:
                 list(related_objects),
             )
 
+
+IFCCONVERT_PATH = Path("/tmp/IfcConvert")
+
+
+def install_ifcconvert():
+    """
+    Downloads and installs the ifcconvert binary if it's not already present.
+    """
+    if not IFCCONVERT_PATH.exists():
+        st.write("🔄 Downloading ifcconvert...")
+        url = "https://github.com/IfcOpenShell/IfcOpenShell/releases/download/ifcconvert-0.8.0/ifcconvert-0.8.0-linux64.zip"
+        zip_path = "/tmp/ifcconvert.zip"
+
+        try:
+            # Download the zip file
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            st.write("✅ Download complete.")
+
+            # Extract the IfcConvert binary
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall("/tmp/")
+            st.write("✅ Extraction complete.")
+
+            # Remove the zip file
+            os.remove(zip_path)
+
+            # Make the binary executable
+            IFCCONVERT_PATH.chmod(0o755)
+            st.write("✅ ifcconvert is ready to use.")
+
+        except Exception as e:
+            st.error(f"🚨 Failed to install ifcconvert: {e}")
+            st.stop()
 
 def main():
     st.title("IFC Object Filter")
